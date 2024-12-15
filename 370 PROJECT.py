@@ -31,6 +31,7 @@ depot_capacity_data = pd.read_csv('Depot_Capacities.csv')
 demand = {row['node']: row['demand'] for _, row in node_demand_data.iterrows()}
 vehicle_capacity = {row['depot']: row['capacity'] for _, row in depot_capacity_data.iterrows()}
 operating_cost = {row['depot']: row['operating_cost'] for _, row in depot_capacity_data.iterrows()}
+cost_per_miles = {row['depot']: row['cost_per_miles'] for _, row in depot_capacity_data.iterrows()}
 # Create model
 model = Model("Refined_VRP_with_Load_and_MultiDepots")
 
@@ -46,7 +47,7 @@ u = model.addVars(nodes, depots, vtype=GRB.CONTINUOUS, lb=0.0, name="u")
 
 # Objective: Minimize total distance and operating cost
 model.setObjective(
-    quicksum(distances[i, j] * x[i, j, d] for (i, j) in arcs for d in depots) +
+    quicksum(distances[i, j] * x[i, j, d] * cost_per_miles[d] for (i, j) in arcs for d in depots) +
     quicksum(operating_cost[d] * y[d] for d in depots),
     GRB.MINIMIZE
 )
